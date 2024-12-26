@@ -3,49 +3,81 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AR.js with WebXR</title>
-  <!-- A-Frame y AR.js -->
-  <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
-  <script src="https://cdn.rawgit.com/jeromeetienne/ar.js/2.2.1/aframe/build/aframe-ar.min.js"></script>
+  <title>WebXR AR Example</title>
   <style>
     body {
       margin: 0;
       overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: #f0f0f0;
+    }
+    #start-button {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: #76c7c0;
+      border: none;
+      border-radius: 4px;
+      padding: 10px 20px;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
     }
   </style>
 </head>
 <body>
-  <a-scene embedded arjs>
-    <!-- Configuración del marcador -->
-    <a-marker type="pattern" url="pattern-QR.patt">
-      <!-- Modelo 3D -->
-      <a-entity
-        gltf-model="https://monteverdeengin.github.io/ARtest/TestQr.glb"
-        scale="0.1 0.1 0.1"
-        position="0 0 0">
-      </a-entity>
-    </a-marker>
-
-    <!-- Cámara -->
-    <a-entity camera></a-entity>
-  </a-scene>
-
+  <button id="start-button">Entrar a AR</button>
   <script>
-    // Detección de WebXR
-    if (navigator.xr) {
-      navigator.xr.isSessionSupported('immersive-ar').then((supported) => {
-        if (supported) {
-          console.log('WebXR compatible: immersive-ar disponible');
-        } else {
-          console.log('WebXR no soporta immersive-ar en este dispositivo');
+    async function startAR() {
+      if (!navigator.xr) {
+        alert("WebXR no es compatible en este navegador");
+        return;
+      }
+
+      try {
+        const session = await navigator.xr.requestSession('immersive-ar', {
+          requiredFeatures: ['local-floor'],
+          optionalFeatures: ['dom-overlay'],
+        });
+
+        // Crear un canvas WebGL para renderizar
+        const canvas = document.createElement('canvas');
+        const gl = canvas.getContext('webgl', { xrCompatible: true });
+        document.body.appendChild(canvas);
+
+        // Configurar la sesión WebXR
+        const xrLayer = new XRWebGLLayer(session, gl);
+        session.updateRenderState({ baseLayer: xrLayer });
+
+        // Configurar el espacio de referencia
+        const referenceSpace = await session.requestReferenceSpace('local-floor');
+
+        // Manejar el loop de animación
+        function onXRFrame(time, frame) {
+          const session = frame.session;
+          session.requestAnimationFrame(onXRFrame);
+
+          // Procesar la pose
+          const pose = frame.getViewerPose(referenceSpace);
+          if (pose) {
+            console.log("AR activa: ", pose);
+          }
         }
-      });
-    } else {
-      console.log('WebXR no está disponible en este navegador');
+
+        session.requestAnimationFrame(onXRFrame);
+      } catch (e) {
+        console.error("Error al iniciar la sesión AR:", e);
+        alert("No se pudo iniciar AR: " + e.message);
+      }
     }
+
+    // Evento de clic para el botón
+    document.getElementById('start-button').addEventListener('click', startAR);
   </script>
 </body>
 </html>
-
-
 
