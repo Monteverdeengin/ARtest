@@ -1,50 +1,56 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>AR.js Stable Tracking</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/aframe/1.4.2/aframe.min.js"></script>
-    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
-    <script>
-        AFRAME.registerComponent('model-visibility', {
-            init: function() {
-                this.el.sceneEl.addEventListener('markerFound', () => {
-                    this.el.setAttribute('visible', true);
-                });
-                this.el.sceneEl.addEventListener('markerLost', () => {
-                    setTimeout(() => {
-                        this.el.setAttribute('visible', false);
-                    }, 500);
-                });
-            }
-        });
-    </script>
+    <title>WebXR AR</title>
+    <script src="https://unpkg.com/three@0.126.0/build/three.js"></script>
+    <script src="https://unpkg.com/three@0.126.0/examples/js/loaders/GLTFLoader.js"></script>
 </head>
-<body style="margin: 0; overflow: hidden;">
-    <a-scene embedded 
-             arjs="trackingMethod: best; 
-                   sourceType: webcam; 
-                   debugUIEnabled: false;
-                   patternRatio: 0.80;
-                   maxDetectionRate: 30;
-                   canvasWidth: 1280;
-                   canvasHeight: 960;">
-        <a-marker type="pattern" 
-                  url="pattern-QR.patt"
-                  smooth="true"
-                  smoothCount="15"
-                  smoothTolerance: "0.005"
-                  smoothThreshold="5"
-                  raycaster="objects: .clickable">
-            <a-entity 
-                position="0 0 0"
-                rotation="0 0 90"
-                scale="1 1 1"
-                class="clickable"
-                model-visibility
-                gltf-model="TestQr.glb">
-            </a-entity>
-        </a-marker>
-        <a-entity camera></a-entity>
-    </a-scene>
+<body style="margin: 0">
+    <script>
+        let camera, scene, renderer;
+        let model;
+
+        init();
+
+        async function init() {
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.01, 20);
+
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.xr.enabled = true;
+            document.body.appendChild(renderer.domElement);
+
+            const light = new THREE.HemisphereLight(0xffffff, 0xbbbbff, 1);
+            scene.add(light);
+
+            const loader = new THREE.GLTFLoader();
+            loader.load('TestQr.glb', function(gltf) {
+                model = gltf.scene;
+                model.scale.set(0.3, 0.3, 0.3);
+                scene.add(model);
+            });
+
+            document.body.appendChild(ARButton.createButton(renderer, {
+                requiredFeatures: ['hit-test']
+            }));
+
+            renderer.setAnimationLoop(render);
+        }
+
+        function render(timestamp, frame) {
+            if (frame) {
+                const referenceSpace = renderer.xr.getReferenceSpace();
+                const session = renderer.xr.getSession();
+
+                if (model) {
+                    model.rotation.y += 0.01;
+                }
+            }
+
+            renderer.render(scene, camera);
+        }
+    </script>
 </body>
 </html>
