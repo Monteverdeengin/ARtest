@@ -1,0 +1,7 @@
+{
+  "dependencies": {
+    "mind-ar": "^1.2.3",
+    "@babel/runtime": "^7.17.2",
+    "aframe": "^1.4.2"
+  }
+}
