@@ -3,41 +3,47 @@
   <head>
     <title>Mind AR Test</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/mind-ar/1.2.3/mindar-image.prod.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/mind-ar/1.2.3/mindar-image-aframe.prod.js"></script>
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.3/dist/mindar-image.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.3/dist/mindar-image.prod.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.3/dist/mindar-image-aframe.prod.js"></script>
+
     <script>
-      AFRAME.registerComponent('model-loaded', {
-        init: function () {
-          console.log('Componente inicializado');
-          this.el.addEventListener('model-loaded', () => {
-            console.log('Modelo cargado exitosamente');
-          });
-          this.el.addEventListener('model-error', (error) => {
-            console.log('Error cargando modelo:', error);
-          });
-        }
+      document.addEventListener('DOMContentLoaded', function() {
+        console.log('DOM loaded');
+        
+        const sceneEl = document.querySelector('a-scene');
+        const modelEl = document.querySelector('a-gltf-model');
+        
+        sceneEl.addEventListener('loaded', () => console.log('Scene loaded'));
+        sceneEl.addEventListener('arError', (error) => console.log('AR Error:', error));
+        
+        modelEl.addEventListener('model-loaded', () => console.log('Model loaded'));
+        modelEl.addEventListener('model-error', (error) => console.log('Model error:', error));
       });
     </script>
   </head>
   <body>
-    <a-scene mindar-image="imageTargetSrc: ./targets.mind;" color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
+    <a-scene
+      mindar-image="imageTargetSrc: ./targets.mind; showStats: true;"
+      color-space="sRGB"
+      embedded
+      renderer="colorManagement: true, physicallyCorrectLights"
+      vr-mode-ui="enabled: false"
+      device-orientation-permission-ui="enabled: false"
+    >
       <a-assets>
-        <a-asset-item id="model" src="TestQr.glb"></a-asset-item>
+        <a-asset-item id="model" src="./TestQr.glb"></a-asset-item>
       </a-assets>
 
       <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
       <a-entity mindar-image-target="targetIndex: 0">
-        <a-gltf-model 
-          rotation="0 0 0" 
-          position="0 0 0.1" 
-          scale="0.1 0.1 0.1" 
+        <a-gltf-model
+          rotation="0 0 0"
+          position="0 0 0.1"
+          scale="0.1 0.1 0.1"
           src="#model"
-          model-loaded
-          animation="property: rotation; to: 0 360 0; loop: true; dur: 10000">
-        </a-gltf-model>
+        ></a-gltf-model>
       </a-entity>
     </a-scene>
   </body>
