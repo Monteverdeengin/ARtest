@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AR Viewer</title>
-  <!-- Model Viewer Library -->
+  <title>AR Viewer with model-viewer</title>
+  <!-- Import Model Viewer Library -->
   <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
   <style>
     body {
@@ -34,23 +34,6 @@
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
       cursor: pointer;
     }
-    .progress-bar {
-      display: block;
-      width: 50%;
-      height: 4px;
-      position: absolute;
-      bottom: 80px;
-      left: 50%;
-      transform: translateX(-50%);
-      background-color: #ccc;
-      border-radius: 2px;
-    }
-    .progress-bar .update-bar {
-      width: 0%;
-      height: 100%;
-      background-color: #76c7c0;
-      border-radius: 2px;
-    }
   </style>
 </head>
 <body>
@@ -60,15 +43,11 @@
     ar
     ar-modes="webxr scene-viewer quick-look"
     camera-controls
+    interaction-prompt="when-focused"
     tone-mapping="neutral"
     shadow-intensity="1"
     scale="1 1 1"
-    poster="https://monteverdeengin.github.io/ARtest/poster.webp"
     alt="A 3D model in AR">
-    <!-- Progress Bar -->
-    <div class="progress-bar" slot="progress-bar">
-      <div class="update-bar"></div>
-    </div>
     <!-- AR Button -->
     <button slot="ar-button" id="ar-button">
       View in your space
