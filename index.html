@@ -7,6 +7,19 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mind-ar/1.2.3/mindar-image-aframe.prod.js"></script>
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.3/dist/mindar-image.min.js"></script>
+    <script>
+      AFRAME.registerComponent('model-loaded', {
+        init: function () {
+          console.log('Componente inicializado');
+          this.el.addEventListener('model-loaded', () => {
+            console.log('Modelo cargado exitosamente');
+          });
+          this.el.addEventListener('model-error', (error) => {
+            console.log('Error cargando modelo:', error);
+          });
+        }
+      });
+    </script>
   </head>
   <body>
     <a-scene mindar-image="imageTargetSrc: ./targets.mind;" color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
@@ -17,7 +30,14 @@
       <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
       <a-entity mindar-image-target="targetIndex: 0">
-        <a-gltf-model rotation="0 0 0" position="0 0 0.1" scale="0.1 0.1 0.1" src="#model" animation="property: rotation; to: 0 360 0; loop: true; dur: 10000"></a-gltf-model>
+        <a-gltf-model 
+          rotation="0 0 0" 
+          position="0 0 0.1" 
+          scale="0.1 0.1 0.1" 
+          src="#model"
+          model-loaded
+          animation="property: rotation; to: 0 360 0; loop: true; dur: 10000">
+        </a-gltf-model>
       </a-entity>
     </a-scene>
   </body>
