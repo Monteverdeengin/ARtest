@@ -1,30 +1,79 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>AR.js - QR Impreso</title>
+    <title>AR.js Experience</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
     <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
+    <script>
+        AFRAME.registerComponent('marker-handler', {
+            init: function() {
+                this.marker = this.el;
+                this.model = this.el.querySelector('a-entity');
+                this.isVisible = false;
+                this.stabilityCounter = 0;
+                
+                this.marker.addEventListener('markerFound', () => {
+                    this.isVisible = true;
+                    this.stabilityCounter = 0;
+                });
+                
+                this.marker.addEventListener('markerLost', () => {
+                    this.isVisible = false;
+                });
+            },
+            
+            tick: function() {
+                if (this.isVisible) {
+                    this.stabilityCounter++;
+                    if (this.stabilityCounter > 30) { // Ajusta este valor según necesites
+                        this.model.setAttribute('visible', true);
+                    }
+                } else {
+                    if (this.stabilityCounter > 0) {
+                        this.stabilityCounter--;
+                    }
+                    if (this.stabilityCounter < 15) { // Umbral de ocultamiento
+                        this.model.setAttribute('visible', false);
+                    }
+                }
+            }
+        });
+    </script>
 </head>
 <body style="margin: 0;">
     <a-scene embedded
-        arjs="sourceType: webcam;
-              patternRatio: 0.90;
-              detectionMode: mono">
+        vr-mode-ui="enabled: false;"
+        renderer="logarithmicDepthBuffer: true; precision: medium;"
+        arjs="trackingMethod: best; 
+              sourceType: webcam;
+              debugUIEnabled: false;
+              patternRatio: 0.75;
+              detectionMode: mono;
+              sourceWidth: 1280;
+              sourceHeight: 960;
+              maxDetectionRate: 60;
+              canvasWidth: 1280;
+              canvasHeight: 960;">
+        
         <a-marker type="pattern" 
                   url="./pattern-QR.patt"
+                  marker-handler
                   smooth="true"
-                  smoothCount="15">
+                  smoothCount="10"
+                  smoothTolerance="0.01"
+                  smoothThreshold="5"
+                  raycaster="objects: .clickable">
             <a-entity
-                position="0 0 0"
+                class="clickable"
+                position="0 0.5 0"
                 rotation="-90 0 0"
                 scale="0.3 0.3 0.3"
-                gltf-model="./TestQr.glb">
+                gltf-model="./TestQr.glb"
+                visible="false">
             </a-entity>
         </a-marker>
-        <a-entity camera></a-entity>
-    </a-scene>
-</body>
-</html>
+        
         <a-entity camera></a-entity>
     </a-scene>
 </body>
