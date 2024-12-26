@@ -6,62 +6,31 @@
     <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.1.5/dist/mindar-image-aframe.prod.js"></script>
     <script src="https://unpkg.com/three@0.126.0/build/three.min.js"></script>
+    <script src="https://unpkg.com/three@0.126.0/examples/js/loaders/RGBELoader.js"></script>
     <style>
         #debug {
             position: fixed;
             top: 10px;
             left: 10px;
-            background: rgba(0, 0, 0, 0.8);
+            background: black;
             color: white;
-            padding: 10px;
-            font-family: monospace;
-            font-size: 14px;
+            padding: 8px;
             z-index: 1000;
-            max-width: 80%;
-            word-wrap: break-word;
         }
     </style>
 </head>
 <body>
     <div id="debug">Estado: Iniciando...</div>
-    
-    <!-- Agregamos un componente personalizado para manejar la carga del modelo -->
-    <script>
-        AFRAME.registerComponent('model-handler', {
-            init: function() {
-                this.el.addEventListener('model-error', (error) => {
-                    console.error('Error en el modelo:', error);
-                    document.getElementById('debug').textContent = 
-                        'Error al cargar modelo: ' + JSON.stringify(error.detail);
-                });
-                
-                this.el.addEventListener('model-loaded', (event) => {
-                    console.log('Modelo cargado exitosamente');
-                    document.getElementById('debug').textContent = 
-                        'Modelo cargado correctamente';
-                });
-            }
-        });
-    </script>
-
     <a-scene mindar-image="imageTargetSrc: targets.mind; uiScanning: true;" 
-             vr-mode-ui="enabled: false" 
-             renderer="colorManagement: true">
+             vr-mode-ui="enabled: false">
         
-        <a-assets timeout="30000">
-            <!-- Aumentamos el timeout y agregamos un evento de error -->
-            <a-asset-item id="model" src="TestQr.glb"
-                         response-type="arraybuffer"></a-asset-item>
-        </a-assets>
-
         <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
         
         <a-entity mindar-image-target="targetIndex: 0">
-            <a-gltf-model src="#model" 
+            <a-gltf-model src="TestQr.glb" 
                          position="0 0 0" 
                          scale="0.3 0.3 0.3" 
-                         rotation="90 0 0"
-                         model-handler></a-gltf-model>
+                         rotation="90 0 0"></a-gltf-model>
         </a-entity>
 
         <a-entity light="type: ambient; intensity: 1.0"></a-entity>
@@ -70,60 +39,45 @@
 
     <script>
         const debug = document.getElementById('debug');
-        const sceneEl = document.querySelector('a-scene');
+        const scene = document.querySelector('a-scene');
         
-        // Verificar si el modelo está en los assets
-        const modelAsset = document.querySelector('#model');
-        if (modelAsset) {
-            modelAsset.addEventListener('error', (error) => {
-                console.error('Error cargando asset:', error);
-                debug.textContent = 'Error cargando asset del modelo: ' + error;
-            });
-        } else {
-            debug.textContent = 'No se encontró el asset del modelo';
-        }
+        scene.addEventListener('arReady', () => {
+            debug.textContent = 'Estado: AR Listo - Apunta al marcador';
+            
+            // Intentamos cargar el HDRI después de que la escena esté lista
+            setTimeout(() => {
+                try {
+                    const renderer = scene.renderer;
+                    if (renderer) {
+                        const pmremGenerator = new THREE.PMREMGenerator(renderer);
+                        pmremGenerator.compileEquirectangularShader();
+                        
+                        new THREE.RGBELoader()
+                            .setDataType(THREE.UnsignedByteType)
+                            .load('qwantani_patio_1k.hdr', function(texture) {
+                                const envMap = pmremGenerator.fromEquirectangular(texture).texture;
+                                scene.object3D.environment = envMap;
+                                texture.dispose();
+                                pmremGenerator.dispose();
+                                debug.textContent = 'Estado: HDRI cargado';
+                            });
+                    }
+                } catch (error) {
+                    console.warn('No se pudo cargar el HDRI:', error);
+                }
+            }, 1000); // Esperamos 1 segundo después de que la escena esté lista
+        });
 
-        // Eventos de la escena
-        sceneEl.addEventListener('renderstart', () => {
-            debug.textContent = 'Estado: Escena iniciada';
+        scene.addEventListener('arError', (err) => {
+            debug.textContent = 'Error: ' + err;
         });
-        
-        sceneEl.addEventListener('arReady', () => {
-            debug.textContent = 'Estado: AR Listo - Buscando marcador';
-        });
-        
-        sceneEl.addEventListener('arError', (error) => {
-            console.error('Error AR:', error);
-            debug.textContent = 'Error AR: ' + JSON.stringify(error.detail);
-        });
-        
-        // Eventos del target
-        sceneEl.addEventListener('targetFound', () => {
+
+        scene.addEventListener('targetFound', () => {
             debug.textContent = 'Estado: Marcador encontrado';
         });
-        
-        sceneEl.addEventListener('targetLost', () => {
+
+        scene.addEventListener('targetLost', () => {
             debug.textContent = 'Estado: Marcador perdido';
-        });
-
-        // Verificar la carga del modelo después de que la escena esté lista
-        sceneEl.addEventListener('loaded', () => {
-            const model = document.querySelector('a-gltf-model');
-            if (!model) {
-                debug.textContent = 'Error: No se pudo encontrar el elemento a-gltf-model';
-                return;
-            }
-            
-            if (!model.components) {
-                debug.textContent = 'Error: El modelo no tiene componentes inicializados';
-                return;
-            }
-
-            const modelComponent = model.components['gltf-model'];
-            if (!modelComponent) {
-                debug.textContent = 'Error: No se encontró el componente gltf-model';
-                return;
-            }
         });
     </script>
 </body>
