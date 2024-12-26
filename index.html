@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AR Viewer with model-viewer</title>
-  <!-- Import Model Viewer Library -->
+  <title>3D Model Viewer</title>
+  <!-- Carga la biblioteca de model-viewer -->
   <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
   <style>
     body {
@@ -34,24 +34,49 @@
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
       cursor: pointer;
     }
+    .progress-bar {
+      display: block;
+      width: 50%;
+      height: 4px;
+      position: absolute;
+      bottom: 80px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: #ccc;
+      border-radius: 2px;
+    }
+    .progress-bar .update-bar {
+      width: 0%;
+      height: 100%;
+      background-color: #76c7c0;
+      border-radius: 2px;
+    }
   </style>
 </head>
 <body>
-  <!-- Model Viewer Element -->
+  <!-- Componente Model Viewer -->
   <model-viewer
-    src="https://monteverdeengin.github.io/ARtest/model.glb"
+    src="TestQr.glb"
     ar
     ar-modes="webxr scene-viewer quick-look"
     camera-controls
-    interaction-prompt="when-focused"
     tone-mapping="neutral"
+    poster="poster.webp"
     shadow-intensity="1"
-    scale="1 1 1"
     alt="A 3D model in AR">
-    <!-- AR Button -->
+    <!-- Barra de progreso -->
+    <div class="progress-bar" slot="progress-bar">
+      <div class="update-bar"></div>
+    </div>
+    <!-- Botón de AR -->
     <button slot="ar-button" id="ar-button">
       View in your space
     </button>
+    <!-- Indicador de AR -->
+    <div id="ar-prompt">
+      <img src="https://modelviewer.dev/shared-assets/icons/hand.png">
+    </div>
   </model-viewer>
 </body>
 </html>
+
