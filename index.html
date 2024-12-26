@@ -18,14 +18,26 @@
         <a-entity light="type: directional; intensity: 0.6" position="-1 1 0"></a-entity>
     </a-scene>
     <script>
-        window.addEventListener('load', function() {
-            const scene = document.querySelector('a-scene').object3D;
+        const debug = document.getElementById('debug');
+        const sceneEl = document.querySelector('a-scene');
+        
+        sceneEl.addEventListener('renderstart', () => {
+            debug.textContent = 'Estado: Escena iniciada';
+        });
+        
+        sceneEl.addEventListener('arReady', () => {
+            debug.textContent = 'Estado: AR Listo';
             const loader = new THREE.RGBELoader();
             loader.load('qwantani_patio_1k.hdr', function(texture) {
+                const scene = sceneEl.object3D;
                 texture.mapping = THREE.EquirectangularReflectionMapping;
                 scene.environment = texture;
                 scene.background = texture;
             });
+        });
+        
+        sceneEl.addEventListener('targetFound', () => {
+            debug.textContent = 'Estado: Marcador encontrado';
         });
     </script>
 </body>
