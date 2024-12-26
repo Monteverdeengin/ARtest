@@ -1,7 +1,9 @@
 {
+  "name": "ar-test",
+  "version": "1.0.0",
   "dependencies": {
     "mind-ar": "^1.2.3",
-    "@babel/runtime": "^7.17.2",
+    "three": "^0.147.0",
     "aframe": "^1.4.2"
   }
 }
