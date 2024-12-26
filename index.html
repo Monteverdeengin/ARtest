@@ -1,39 +1,13 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.1.5/dist/mindar-image.prod.js"></script>
     <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.1.5/dist/mindar-image-aframe.prod.js"></script>
 </head>
 <body>
-    <div id="debug">Estado: Iniciando...</div>
-    <a-scene mindar-image="imageTargetSrc: targets.mind; uiScanning: true;" vr-mode-ui="enabled: false">
-        <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
-        <a-entity mindar-image-target="targetIndex: 0">
-            <a-gltf-model src="TestQr.glb" position="0 0 0" scale="5 5 5" rotation="0 0 0"></a-gltf-model>
-        </a-entity>
+    <a-scene>
+        <a-entity position="0 1.6 -3" gltf-model="TestQr.glb"></a-entity>
+        <a-sky color="#ECECEC"></a-sky>
+        <a-camera position="0 1.6 0"></a-camera>
     </a-scene>
-    <script>
-        const scene = document.querySelector('a-scene');
-        const debug = document.getElementById('debug');
-        const model = document.querySelector('a-gltf-model');
-        
-        scene.addEventListener('arReady', () => {
-            debug.textContent = 'AR Listo';
-        });
-        
-        scene.addEventListener('targetFound', () => {
-            debug.textContent = 'Marcador encontrado';
-            // Aumentar escala gradualmente
-            let scale = 5;
-            const interval = setInterval(() => {
-                scale += 5;
-                if(scale > 50) clearInterval(interval);
-                model.setAttribute('scale', `${scale} ${scale} ${scale}`);
-                debug.textContent = `Escala: ${scale}`;
-            }, 1000);
-        });
-    </script>
 </body>
 </html>
