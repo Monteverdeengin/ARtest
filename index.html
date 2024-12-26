@@ -1,38 +1,22 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.3/dist/mindar-image.prod.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.3/dist/mindar-image-aframe.prod.js"></script>
-    <style>
-      #debug {
-        position: fixed;
-        top: 0;
-        left: 0;
-        color: white;
-        background: black;
-        padding: 10px;
-        z-index: 1000;
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script>
+    async function startCamera() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        document.getElementById('video').srcObject = stream;
+        document.getElementById('status').textContent = 'Cámara activada';
+      } catch (err) {
+        document.getElementById('status').textContent = 'Error: ' + err.message;
       }
-    </style>
-  </head>
-  <body>
-    <div id="debug">Status: Iniciando...</div>
-    <script>
-      const debug = document.getElementById('debug');
-      window.onerror = function(msg, url, line) {
-        debug.innerHTML += '<br>Error: ' + msg;
-      }
-      debug.innerHTML += '<br>Scripts cargados';
-    </script>
-    <a-scene mindar-image="imageTargetSrc: targets.mind;" embedded>
-      <a-assets>
-        <a-asset-item id="model" src="TestQr.glb"></a-asset-item>
-      </a-assets>
-      <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
-      <a-entity mindar-image-target="targetIndex: 0">
-        <a-gltf-model src="#model" position="0 0 0" scale="0.5 0.5 0.5"></a-gltf-model>
-      </a-entity>
-    </a-scene>
-  </body>
+    }
+  </script>
+</head>
+<body>
+  <div id="status">Esperando cámara...</div>
+  <button onclick="startCamera()">Activar cámara</button>
+  <video id="video" autoplay playsinline></video>
+</body>
 </html>
