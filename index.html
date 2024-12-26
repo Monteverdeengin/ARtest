@@ -10,32 +10,30 @@
             init: function() {
                 this.marker = this.el;
                 this.model = this.el.querySelector('a-entity');
-                this.isVisible = false;
-                this.stabilityCounter = 0;
                 
                 this.marker.addEventListener('markerFound', () => {
-                    this.isVisible = true;
-                    this.stabilityCounter = 0;
+                    this.model.setAttribute('visible', true);
                 });
                 
                 this.marker.addEventListener('markerLost', () => {
-                    this.isVisible = false;
+                    this.model.setAttribute('visible', false);
+                });
+            }
+        });
+
+        AFRAME.registerComponent('model-viewer', {
+            init: function() {
+                this.el.addEventListener('model-loaded', () => {
+                    // Ajusta la posición inicial
+                    this.el.object3D.position.set(0, 0, 0);
                 });
             },
             
             tick: function() {
-                if (this.isVisible) {
-                    this.stabilityCounter++;
-                    if (this.stabilityCounter > 30) { // Ajusta este valor según necesites
-                        this.model.setAttribute('visible', true);
-                    }
-                } else {
-                    if (this.stabilityCounter > 0) {
-                        this.stabilityCounter--;
-                    }
-                    if (this.stabilityCounter < 15) { // Umbral de ocultamiento
-                        this.model.setAttribute('visible', false);
-                    }
+                if (this.el.object3D) {
+                    // El modelo seguirá la orientación del marcador
+                    const markerRotation = this.el.parentEl.object3D.rotation;
+                    this.el.object3D.rotation.y = markerRotation.y;
                 }
             }
         });
@@ -44,37 +42,31 @@
 <body style="margin: 0;">
     <a-scene embedded
         vr-mode-ui="enabled: false;"
-        renderer="logarithmicDepthBuffer: true; precision: medium;"
+        renderer="logarithmicDepthBuffer: true;"
         arjs="trackingMethod: best; 
               sourceType: webcam;
               debugUIEnabled: false;
-              patternRatio: 0.75;
-              detectionMode: mono;
-              sourceWidth: 1280;
-              sourceHeight: 960;
-              maxDetectionRate: 60;
-              canvasWidth: 1280;
-              canvasHeight: 960;">
+              detectionMode: mono;">
         
         <a-marker type="pattern" 
                   url="./pattern-QR.patt"
                   marker-handler
                   smooth="true"
-                  smoothCount="10"
+                  smoothCount="5"
                   smoothTolerance="0.01"
-                  smoothThreshold="5"
                   raycaster="objects: .clickable">
             <a-entity
                 class="clickable"
-                position="0 0.5 0"
-                rotation="-90 0 0"
+                position="0 0 0"
+                rotation="0 0 0"
                 scale="0.3 0.3 0.3"
                 gltf-model="./TestQr.glb"
+                model-viewer
                 visible="false">
             </a-entity>
         </a-marker>
         
-        <a-entity camera></a-entity>
+        <a-entity camera look-controls></a-entity>
     </a-scene>
 </body>
 </html>
