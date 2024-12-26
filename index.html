@@ -5,20 +5,28 @@
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.1.5/dist/mindar-image.prod.js"></script>
     <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.1.5/dist/mindar-image-aframe.prod.js"></script>
+    <script src="https://unpkg.com/three@0.126.0/build/three.min.js"></script>
 </head>
 <body>
     <div id="debug">Estado: Iniciando...</div>
     <a-scene mindar-image="imageTargetSrc: targets.mind; uiScanning: true;" vr-mode-ui="enabled: false">
-        <a-assets>
-            <img id="sky" src="qwantani_patio_1k.hdr" />
-        </a-assets>
-        
         <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
         <a-entity mindar-image-target="targetIndex: 0">
             <a-gltf-model src="TestQr.glb" position="0 0 0" scale="0.3 0.3 0.3" rotation="90 0 0"></a-gltf-model>
         </a-entity>
-        
-        <a-sky src="#sky" rotation="0 -90 0"></a-sky>
+        <a-entity light="type: ambient; intensity: 1.0"></a-entity>
+        <a-entity light="type: directional; intensity: 0.6" position="-1 1 0"></a-entity>
     </a-scene>
+    <script>
+        window.addEventListener('load', function() {
+            const scene = document.querySelector('a-scene').object3D;
+            const loader = new THREE.RGBELoader();
+            loader.load('qwantani_patio_1k.hdr', function(texture) {
+                texture.mapping = THREE.EquirectangularReflectionMapping;
+                scene.environment = texture;
+                scene.background = texture;
+            });
+        });
+    </script>
 </body>
 </html>
